@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Orbitron", sans-serif;
+  --font-mono: "Fira Code", monospace;
+  --color-primary: #00FFD1;
+  --color-terminal-green: #00FF41;
+  --color-background-dark: #050505;
+}
+
+@layer base {
+  body {
+    @apply bg-[#050505] font-mono text-[#00FFD1] selection:bg-[#00FFD1] selection:text-black;
+  }
+}
+
+@layer utilities {
+  .scanline-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.05) 50%);
+    background-size: 100% 4px;
+    z-index: 50;
+    pointer-events: none;
+  }
+
+  .matrix-bg {
+    background-image: radial-gradient(circle, rgba(0, 255, 209, 0.1) 1px, transparent 1px);
+    background-size: 30px 30px;
+  }
+
+  .glitch-text {
+    text-shadow: 2px 0 #ff00ff, -2px 0 #00ffff;
+  }
+
+  .terminal-border {
+    border: 1px solid rgba(0, 255, 209, 0.3);
+  }
+
+  .cursor-blink {
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink {
+    from, to { opacity: 0 }
+    50% { opacity: 1 }
+  }
+
+  .flicker {
+    animation: flicker 0.15s infinite;
+  }
+
+  @keyframes flicker {
+    0% { opacity: 0.97; }
+    5% { opacity: 0.95; }
+    10% { opacity: 0.9; }
+    15% { opacity: 0.95; }
+    20% { opacity: 0.98; }
+    25% { opacity: 0.95; }
+    30% { opacity: 0.9; }
+    100% { opacity: 1; }
+  }
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap');

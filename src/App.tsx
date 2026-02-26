@@ -33,7 +33,7 @@ export default function App() {
       <nav className="fixed top-0 w-full z-40 border-b border-primary/10 backdrop-blur-md bg-black/50">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="font-display font-bold text-xl tracking-tighter">
-            [<span className="text-primary">Aashish Porwal</span>]
+            <span className="text-primary">Aashish Porwal</span>
           </div>
           
           <div className="hidden md:flex space-x-8 text-[10px] font-semibold tracking-widest uppercase">

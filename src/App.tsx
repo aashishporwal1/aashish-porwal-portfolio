@@ -31,6 +31,71 @@ import { NAV_LINKS, SKILL_CATEGORIES, EXPERIENCES, PROJECTS } from "./constants"
 
 const MotionSection = motion.section;
 
+const CurtainIntro = () => {
+  return (
+    <motion.div 
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[100] flex"
+    >
+      {/* Left Curtain */}
+      <motion.div 
+        initial={{ x: 0 }}
+        animate={{ x: "-100%" }}
+        transition={{ duration: 1.5, delay: 1.2, ease: [0.87, 0, 0.13, 1] }}
+        className="relative w-1/2 h-full bg-[#050508] border-r border-ai-primary/20 flex items-center justify-end"
+      >
+        <div className="absolute inset-0 neural-mesh opacity-10" />
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: [0, 1, 0], x: 0 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="mr-8 text-ai-primary text-7xl md:text-9xl font-black tracking-tighter"
+        >
+          SYS
+        </motion.div>
+      </motion.div>
+
+      {/* Right Curtain */}
+      <motion.div 
+        initial={{ x: 0 }}
+        animate={{ x: "100%" }}
+        transition={{ duration: 1.5, delay: 1.2, ease: [0.87, 0, 0.13, 1] }}
+        className="relative w-1/2 h-full bg-[#050508] border-l border-ai-primary/20 flex items-center justify-start"
+      >
+        <div className="absolute inset-0 neural-mesh opacity-10" />
+        <motion.div 
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: [0, 1, 0], x: 0 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="ml-8 text-ai-primary text-7xl md:text-9xl font-black tracking-tighter"
+        >
+          INIT
+        </motion.div>
+      </motion.div>
+
+      {/* Central Scanning Element */}
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: [0.8, 1.1, 0.8], opacity: [0, 1, 0] }}
+        transition={{ duration: 1, delay: 0.2 }}
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[110] flex flex-col items-center space-y-4"
+      >
+        <div className="relative">
+          <Brain size={80} className="text-ai-primary" />
+          <motion.div 
+            animate={{ top: ["0%", "100%", "0%"] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            className="absolute left-0 right-0 h-[2px] bg-ai-accent shadow-[0_0_15px_#22d3ee] z-20"
+          />
+        </div>
+        <span className="text-[10px] font-bold tracking-[0.5em] text-ai-accent uppercase animate-pulse">
+          Establishing Neural Link
+        </span>
+      </motion.div>
+    </motion.div>
+  );
+};
+
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -211,7 +276,14 @@ const BackgroundElements = () => {
 };
 
 export default function App() {
+  const [showIntro, setShowIntro] = useState(true);
   const { scrollYProgress } = useScroll();
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowIntro(false), 2500);
+    return () => clearTimeout(timer);
+  }, []);
+
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
     damping: 30,
@@ -223,6 +295,9 @@ export default function App() {
 
   return (
     <div className="relative min-h-screen custom-scrollbar bg-ai-bg">
+      <AnimatePresence>
+        {showIntro && <CurtainIntro />}
+      </AnimatePresence>
       <BackgroundElements />
       <Navbar />
       

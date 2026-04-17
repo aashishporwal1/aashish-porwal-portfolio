@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { motion, AnimatePresence, useScroll, useSpring } from "motion/react";
 import { 
   Terminal, 
   Brain, 
@@ -23,9 +22,11 @@ import {
   Sparkles,
   Zap,
   Activity,
-  MapPin
+  MapPin,
+  ArrowRight
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence, useScroll, useSpring, useTransform, useInView } from "motion/react";
 import { NAV_LINKS, SKILL_CATEGORIES, EXPERIENCES, PROJECTS } from "./constants";
 
 const MotionSection = motion.section;
@@ -108,26 +109,57 @@ const Navbar = () => {
 };
 
 const SectionHeader = ({ id, title }: { id: string; title: string }) => {
+  const containerRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "end start"]
+  });
+
+  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
+  const y = useTransform(scrollYProgress, [0, 0.2], [50, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.2], [0.8, 1]);
+
   return (
-    <div className="flex flex-col mb-16 relative">
-      <motion.span 
-        initial={{ opacity: 0, y: 10 }}
-        whileInView={{ opacity: 0.5, y: 0 }}
-        className="text-[10px] font-bold tracking-[0.3em] text-ai-primary mb-2 uppercase"
-      >
-        Section {id}
-      </motion.span>
-      <div className="flex items-center space-x-6">
-        <motion.h2 
-          initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          className="text-3xl md:text-5xl font-extrabold"
-        >
-          {title}
-        </motion.h2>
-        <div className="h-px bg-gradient-to-r from-ai-primary/50 to-transparent flex-grow" />
+    <motion.div 
+      ref={containerRef}
+      style={{ opacity, y, scale }}
+      className="flex flex-col mb-24 relative z-20"
+    >
+      <div className="flex items-center space-x-4 mb-4">
+        <div className="w-12 h-[1px] bg-ai-primary/50" />
+        <span className="text-[10px] font-bold tracking-[0.4em] text-ai-primary uppercase italic">
+          NODE_ID: {id}
+        </span>
       </div>
-    </div>
+      <div className="flex items-end space-x-8">
+        <h2 className="text-5xl md:text-8xl font-extrabold tracking-tighter leading-none">
+          {title.split(' ').map((word, i) => (
+            <span key={i} className={i % 2 === 0 ? "text-white" : "text-transparent stroke-text"}>
+              {word}{' '}
+            </span>
+          ))}
+        </h2>
+        <div className="h-4 w-4 bg-ai-primary rounded-full mb-4 animate-pulse" />
+      </div>
+      <div className="mt-8 h-[1px] w-full bg-gradient-to-r from-ai-primary/50 via-ai-border to-transparent" />
+    </motion.div>
+  );
+};
+
+const ParallaxTitle = ({ children, offset = 100 }: { children: React.ReactNode, offset?: number }) => {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"]
+  });
+
+  const y = useTransform(scrollYProgress, [0, 1], [-offset, offset]);
+  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
+
+  return (
+    <motion.div ref={ref} style={{ y, opacity }} className="pointer-events-none select-none">
+      {children}
+    </motion.div>
   );
 };
 
@@ -160,13 +192,19 @@ const BackgroundElements = () => {
         className="absolute -top-24 -left-24 w-96 h-96 bg-ai-primary/20 rounded-full blur-[120px]" 
       />
       <motion.div 
+        style={{ y: useTransform(useScroll().scrollYProgress, [0, 1], [0, -200]) }}
         animate={{ 
           x: [0, -50, 0],
-          y: [0, -100, 0],
           scale: [1, 1.1, 1]
         }}
         transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
         className="absolute top-1/2 -right-24 w-80 h-80 bg-ai-secondary/15 rounded-full blur-[100px]" 
+      />
+
+      {/* Central Guiding Line */}
+      <motion.div 
+        style={{ scaleY: useScroll().scrollYProgress }}
+        className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-gradient-to-b from-ai-primary/40 via-ai-secondary/40 to-transparent origin-top -translate-x-1/2" 
       />
     </div>
   );
@@ -179,6 +217,9 @@ export default function App() {
     damping: 30,
     restDelta: 0.001
   });
+
+  const heroScale = useTransform(scrollYProgress, [0, 0.2], [1, 1.2]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
 
   return (
     <div className="relative min-h-screen custom-scrollbar bg-ai-bg">
@@ -193,8 +234,20 @@ export default function App() {
 
       <main className="max-w-7xl mx-auto px-6 relative z-10">
         {/* HERO SECTION */}
-        <section id="home" className="min-h-screen flex flex-col justify-center pt-20">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <section id="home" className="min-h-screen flex flex-col justify-center pt-20 relative overflow-hidden">
+          {/* Background Background Title (Parallax) */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full text-center opacity-5 pointer-events-none overflow-hidden select-none whitespace-nowrap">
+            <ParallaxTitle offset={100}>
+              <h1 className="text-[20vw] font-black uppercase tracking-tighter stroke-text leading-none select-none">
+                ENGINEER
+              </h1>
+            </ParallaxTitle>
+          </div>
+
+          <motion.div 
+            style={{ scale: heroScale, opacity: heroOpacity }}
+            className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-20"
+          >
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
@@ -207,19 +260,31 @@ export default function App() {
               </div>
 
               <div className="space-y-2">
-                <h1 className="text-6xl md:text-8xl lg:text-9xl leading-[0.9] text-white">
-                  Aashish <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-ai-primary via-ai-secondary to-ai-accent">Porwal</span>
-                </h1>
+                <div className="overflow-hidden">
+                  <motion.h1 
+                    initial={{ y: 100 }}
+                    animate={{ y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.5 }}
+                    className="text-6xl md:text-8xl lg:text-9xl leading-[0.9] text-white"
+                  >
+                    Aashish <br />
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-ai-primary via-ai-secondary to-ai-accent">Porwal</span>
+                  </motion.h1>
+                </div>
               </div>
 
               <div className="space-y-4 max-w-xl">
-                <p className="text-lg md:text-2xl text-gray-400 font-medium leading-relaxed">
+                <motion.p 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1 }}
+                  className="text-lg md:text-2xl text-gray-400 font-medium leading-relaxed"
+                >
                   Most AI demos fail in production.{" "}
                   <span className="text-white italic">I build systems that don’t.</span>{" "}
                   Focused on building production-ready applications using{" "}
                   <span className="text-ai-accent">LLMs, RAG, and Multi-Agent Systems.</span>
-                </p>
+                </motion.p>
               </div>
 
               <div className="flex flex-wrap gap-6 pt-4">
@@ -227,9 +292,10 @@ export default function App() {
                   href="#projects"
                   whileHover={{ scale: 1.05, boxShadow: "0 0 25px rgba(99,102,241,0.4)" }}
                   whileTap={{ scale: 0.95 }}
-                  className="bg-ai-primary text-white px-10 py-5 rounded-2xl font-bold tracking-wider transition-all cursor-pointer inline-block"
+                  className="group relative bg-ai-primary text-white px-10 py-5 rounded-2xl font-bold tracking-wider transition-all cursor-pointer inline-flex items-center space-x-3"
                 >
-                  View Projects
+                  <span>View Projects</span>
+                  <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                 </motion.a>
                 <motion.a 
                   href="https://drive.google.com/file/d/1C5Q4wgSMwpzZtM9kcq2NXKxOaNXoQf8w/view?usp=sharing"
@@ -254,17 +320,18 @@ export default function App() {
                 <div className="absolute inset-0 bg-gradient-to-tr from-ai-primary to-ai-secondary rounded-full opacity-20 blur-[80px] animate-pulse" />
                 <div className="flex items-center justify-center h-full">
                   <motion.div 
+                    scale={[1, 1.1, 1]}
                     animate={{ rotate: 360 }}
                     transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
                     className="absolute inset-0 border-[1px] border-dashed border-ai-primary/30 rounded-full" 
                   />
-                  <div className="relative z-10 w-64 h-64 glass-card rounded-full flex items-center justify-center p-8 floating-node">
+                  <div className="relative z-10 w-64 h-64 glass-card rounded-full flex items-center justify-center p-8 floating-node shadow-[0_0_50px_rgba(99,102,241,0.2)]">
                     <Brain size={120} className="text-ai-primary opacity-80" />
                   </div>
                 </div>
               </div>
             </motion.div>
-          </div>
+          </motion.div>
 
           {/* Scroll Indicator */}
           <motion.div 
@@ -279,13 +346,19 @@ export default function App() {
         </section>
 
         {/* SUMMARY SECTION */}
-        <MotionSection id="about" className="py-32">
+        <MotionSection id="about" className="py-32 relative">
+          <div className="absolute top-0 right-0 opacity-[0.03] pointer-events-none select-none">
+            <ParallaxTitle offset={150}>
+              <h2 className="text-[25vw] font-black stroke-text leading-none uppercase">SUMMARY</h2>
+            </ParallaxTitle>
+          </div>
+          
           <SectionHeader id="01" title="Cognitive Summary" />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
             <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true, margin: "-100px" }}
               className="space-y-8 text-xl text-gray-400 leading-relaxed font-light"
             >
               <p>
@@ -367,17 +440,23 @@ export default function App() {
         </MotionSection>
 
         {/* SKILLS SECTION */}
-        <MotionSection id="skills" className="py-32">
+        <MotionSection id="skills" className="py-32 relative">
+          <div className="absolute top-1/2 left-0 -translate-y-1/2 opacity-[0.03] pointer-events-none select-none">
+            <ParallaxTitle offset={-150}>
+              <h2 className="text-[25vw] font-black stroke-text leading-none uppercase">STACK</h2>
+            </ParallaxTitle>
+          </div>
+          
           <SectionHeader id="02" title="Intelligence Stack" />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 relative z-20">
             {SKILL_CATEGORIES.map((cat, i) => (
               <motion.div
                 key={cat.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
                 transition={{ delay: i * 0.1 }}
-                whileHover={{ y: -10, borderColor: "rgba(99,102,241,0.5)" }}
+                whileHover={{ y: -10, borderColor: "rgba(99,102,241,0.5)", scale: 1.02 }}
                 className="glass-card p-8 rounded-3xl group"
               >
                 <div className="flex items-center space-x-4 mb-8 text-ai-primary">
@@ -402,18 +481,24 @@ export default function App() {
         </MotionSection>
 
         {/* EXPERIENCE SECTION */}
-        <MotionSection id="experience" className="py-32">
+        <MotionSection id="experience" className="py-32 relative">
+          <div className="absolute top-0 right-0 opacity-[0.03] pointer-events-none select-none">
+            <ParallaxTitle offset={150}>
+              <h2 className="text-[25vw] font-black stroke-text leading-none uppercase">CAREER</h2>
+            </ParallaxTitle>
+          </div>
+          
           <SectionHeader id="03" title="Experience Path" />
-          <div className="space-y-12 relative max-w-5xl">
+          <div className="space-y-12 relative max-w-5xl z-20">
             <div className="absolute left-0 top-0 bottom-0 w-px bg-gradient-to-b from-ai-primary via-ai-secondary to-transparent ml-4 md:ml-6" />
             
             {EXPERIENCES.map((exp, i) => (
               <motion.div
                 key={exp.company + exp.period}
-                initial={{ opacity: 0, x: -20 }}
+                initial={{ opacity: 0, x: -50 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.2 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ delay: i * 0.2, type: "spring", stiffness: 100 }}
                 className="relative pl-12 md:pl-20"
               >
                 <div className="absolute left-0 top-2 ml-[13px] md:ml-[19px] w-4 h-4 rounded-full border-2 border-ai-primary bg-ai-bg z-10" />
@@ -452,16 +537,22 @@ export default function App() {
         </MotionSection>
 
         {/* PROJECTS SECTION */}
-        <MotionSection id="projects" className="py-32">
+        <MotionSection id="projects" className="py-32 relative">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] pointer-events-none select-none">
+            <ParallaxTitle offset={200}>
+              <h2 className="text-[25vw] font-black stroke-text leading-none uppercase">WORK</h2>
+            </ParallaxTitle>
+          </div>
+          
           <SectionHeader id="04" title="Featured Developments" />
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 relative z-20">
             {PROJECTS.map((project, i) => (
               <motion.div
                 key={project.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.2 }}
+                initial={{ opacity: 0, scale: 0.9, y: 50 }}
+                whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ delay: i * 0.2, type: "spring", damping: 15 }}
                 className="glass-card p-10 md:p-14 rounded-[3rem] relative group overflow-hidden"
               >
                 <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-30 transition-opacity">

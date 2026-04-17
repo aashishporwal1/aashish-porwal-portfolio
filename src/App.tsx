@@ -522,12 +522,14 @@ export default function App() {
 
                 <div className="flex justify-center space-x-12 pt-8">
                   {[
-                    { icon: <Github size={28} />, href: "#", name: "GitHub" },
-                    { icon: <Linkedin size={28} />, href: "#", name: "LinkedIn" }
+                    { icon: <Github size={28} />, href: "https://github.com/aashishporwal1", name: "GitHub" },
+                    { icon: <Linkedin size={28} />, href: "https://www.linkedin.com/in/aashishporwal/", name: "LinkedIn" }
                   ].map((social, i) => (
                     <motion.a
                       key={i}
                       href={social.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       whileHover={{ y: -10, color: "#6366f1" }}
                       className="text-gray-500 flex flex-col items-center space-y-2"
                     >

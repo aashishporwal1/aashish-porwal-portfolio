@@ -98,4 +98,23 @@ export const PROJECTS: Project[] = [
       'Leveraged embeddings and vector search to enhance information retrieval from large documents.',
     ],
   },
+  {
+    title: 'ContextIQ',
+    description: [
+      'Built an Adaptive RAG system with agentic AI, enabling dynamic query routing across indexed data, LLM knowledge, and web search.',
+      'Implemented multi-agent workflows using LangGraph and ReAct, improving response accuracy via query classification and optimization.',
+      'Developed a scalable FastAPI backend with async processing, integrated with Qdrant (vector DB) and MongoDB for efficient retrieval and session memory.',
+      'Built a complete RAG pipeline (ingestion, chunking, embeddings, retrieval) supporting PDF/TXT documents with enhanced search relevance.',
+      'Designed a Streamlit-based chat interface for real-time document interaction and AI-powered responses.',
+    ],
+  },
+  {
+    title: 'Immutec Web Portal',
+    description: [
+      'Built a Django-based web application with REST APIs to manage users, companies, categories, and resources, with secure role-based access control (RBAC) for both admin and regular users.',
+      'Added support for ticket creation and implemented automatic ticket scheduling, streamlining issue tracking and improving response times.',
+      'Integrated email functionality using Mailgun webhooks for automated notifications and handling ticket email replies, improving communication efficiency.',
+      'Deployed the application on AWS EC2, ensuring high availability and scalable performance.',
+    ],
+  },
 ];
